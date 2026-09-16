@@ -85,8 +85,10 @@ The `.gitignore` file contains the current repository-level exclusions.
 
 ## Getting started
 
+The project uses Python 3.12 and `uv` for Python runtime and dependency management.
+
 Clone the repository and enter its root directory:
 
 ```bash
-git clone <repository-url>
+git clone git@github.com:Lineker98/causallift.git
 cd causallift
