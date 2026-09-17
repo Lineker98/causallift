@@ -69,3 +69,18 @@ cloud-provider configuration.
 
 CausalLift currently has no runtime-settings subsystem because no concrete
 runtime-settings requirement exists yet.
+
+### Randomness and reproducibility
+
+Simulation entry points receive explicit integer seeds and create isolated
+NumPy `Generator` instances locally.
+
+Internal stochastic functions should receive an existing `Generator` when they
+belong to the same simulation run rather than creating or reseeding their own
+random state.
+
+Global RNG state such as `np.random.seed(...)` and module-level mutable random
+generators is prohibited.
+
+Deterministic reproduction assumes the same code, explicit inputs, and locked
+dependency environment.

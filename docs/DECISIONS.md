@@ -4,7 +4,7 @@
 
 **Status:** Accepted
 
-### Decision
+## Decision
 
 Use explicit typed function parameters as the default mechanism for passing
 domain, experiment, simulation, and reproducibility-critical configuration.
@@ -70,3 +70,22 @@ Revisit this decision when:
 - configuration must be persisted or versioned as a first-class artifact;
 - infrastructure runtime settings actually exist;
 - explicit parameter flow becomes materially harder to maintain.
+
+## Decision 
+
+Use NumPy Generator instances created locally with default_rng(seed). Simulation entry points accept explicit seeds; lower-level stochastic helpers receive the owned Generator.
+
+### Context
+P0-T09 requires deterministic synthetic causal data without introducing hidden global configuration or RNG state.
+
+### Alternatives
+legacy np.random.seed; module-global Generator; explicit Generator(PCG64(seed)); allowing every function to accept either a seed or RNG.
+
+### Rationale
+local ownership makes state explicit, prevents cross-test/cross-simulation interference, follows NumPy's recommended API, and avoids premature complexity.
+
+### Consequences
+NumPy becomes a runtime dependency. Byte-for-byte reproduction is tied to the locked software environment rather than guaranteed across arbitrary future NumPy versions.
+
+### Revisit when
+parallel simulation, child RNG streams, distributed execution, or a requirement for cross-version random-stream compatibility appears.
