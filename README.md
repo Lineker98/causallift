@@ -58,6 +58,23 @@ Typical prefixes are:
 
 These prefixes are a repository convention, not currently enforced by tooling.
 
+### Local pre-commit hooks
+
+Install the Git pre-commit hook once after cloning the repository:
+
+```bash
+uv run pre-commit install 
+```
+
+Run all configured hoos manually with 
+
+```bash
+uv run pre-commit run --all-files
+```
+
+The pre-commit workflow intentionally runs only fast deterministic checks. The full test and type-checking gates remain separate commands.
+
+
 ## Version-control policy
 
 Files that define or explain the project should normally be versioned, including:
@@ -92,3 +109,5 @@ Clone the repository and enter its root directory:
 ```bash
 git clone git@github.com:Lineker98/causallift.git
 cd causallift
+uv sync --locked
+uv run pre-commit install
