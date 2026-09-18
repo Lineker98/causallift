@@ -1,5 +1,29 @@
 # CausalLift Architecture
 
+## Current implementation
+
+CausalLift currently uses one installable Python package:
+
+```text
+src/causallift/
+```
+
+Current reusable causal simulation code lives under:
+
+```text
+src/causallift/simulations/
+```
+
+The current implementation contains:
+
+- explicit randomness utilities;
+- a randomized-treatment synthetic DGP;
+- a first-principles difference-in-means estimator.
+
+The repository does not yet contain production APIs, persistence, background
+workers, orchestration, model tracking, deployment infrastructure, or other
+application components that have not been justified by current requirements.
+
 ## Configuration strategy
 
 CausalLift separates:
@@ -36,44 +60,10 @@ If a configuration value object becomes justified, it should normally be:
 A frozen standard-library dataclass is the preferred default when such an
 object is actually needed.
 
-### Randomness and reproducibility
+## Randomness and reproducibility
 
-Stochastic operations must not depend on hidden global random state.
-
-The current convention is:
-
-- the caller supplies an explicit integer seed;
-- the component owning the stochastic operation owns its local random state;
-- lower-level helpers receive random state explicitly when necessary;
-- imports must not mutate process-wide random state.
-
-The concrete random-number implementation belongs to P0-T08.
-
-### Infrastructure and runtime settings
-
-Infrastructure settings are separate from causal and experiment parameters.
-
-Examples include future:
-
-- database connection settings;
-- object-storage settings;
-- credentials;
-- deployment-specific API settings.
-
-Infrastructure settings should be resolved at application or infrastructure
-boundaries and passed inward through explicit interfaces.
-
-Domain and simulation code should not directly depend on environment variables,
-`.env` files, FastAPI settings objects, PostgreSQL configuration, or
-cloud-provider configuration.
-
-CausalLift currently has no runtime-settings subsystem because no concrete
-runtime-settings requirement exists yet.
-
-### Randomness and reproducibility
-
-Simulation entry points receive explicit integer seeds and create isolated
-NumPy `Generator` instances locally.
+Top-level simulation boundaries receive explicit integer seeds and create
+isolated NumPy `Generator` instances locally.
 
 Internal stochastic functions should receive an existing `Generator` when they
 belong to the same simulation run rather than creating or reseeding their own
@@ -82,5 +72,40 @@ random state.
 Global RNG state such as `np.random.seed(...)` and module-level mutable random
 generators is prohibited.
 
-Deterministic reproduction assumes the same code, explicit inputs, and locked
+Deterministic reproduction assumes the same explicit inputs, code, and locked
 dependency environment.
+
+The project does not promise identical random streams across arbitrary future
+NumPy versions.
+
+## Infrastructure and runtime settings
+
+Infrastructure settings are separate from causal and experiment parameters.
+
+Examples of future infrastructure settings may include:
+
+- database connection information;
+- object-storage configuration;
+- credentials;
+- deployment-specific application settings.
+
+If introduced, infrastructure settings should be resolved at application or
+infrastructure boundaries and passed inward through explicit interfaces.
+
+Domain and simulation code should not directly depend on environment variables,
+`.env` files, web-framework settings objects, database configuration, or cloud
+provider configuration.
+
+CausalLift currently has no runtime-settings subsystem because no concrete
+runtime-settings requirement exists.
+
+## Deliberately deferred architecture
+
+The current repository does not require a production application architecture.
+
+Components such as APIs, databases, object storage, background jobs,
+authentication, deployment infrastructure, or experiment tracking should be
+introduced only when a concrete product workflow requires them.
+
+The current architectural preference remains to evolve a modular monolith
+before considering distributed or microservice architecture.

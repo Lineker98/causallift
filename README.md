@@ -1,113 +1,114 @@
 # CausalLift
 
-CausalLift is a causal decisioning project focused initially on marketing incrementality and treatment optimization.
+CausalLift is a causal decisioning project focused initially on marketing
+incrementality and treatment optimization.
 
-Its core decision question is:
+Its core business question is:
 
-> Which customers should receive an intervention to maximize incremental business value?
+> Which customers should receive an intervention to maximize incremental
+> business value?
 
-The project explicitly distinguishes three different problems:
+The project distinguishes three different problems:
 
-- **Prediction:** who is likely to convert?
-- **Causality:** who will convert because of the treatment?
-- **Decision:** who should be treated given expected incremental benefit, cost, and operational constraints?
+- **Prediction:** who will convert?
+- **Causality:** who will convert because of treatment?
+- **Decision:** who should receive treatment given expected incremental benefit,
+  cost, and operational constraints?
 
-## Project status
+## Current status
 
-The project is currently in:
+CausalLift is currently in **Phase 0 — Engineering Foundation**.
 
-**Phase 0 — Engineering Foundation and Repository Setup**
+Phase 0 has established the repository, development quality gates,
+reproducibility conventions, and the project's first causal ground-truth test.
 
-The repository is intentionally minimal at this stage.
+The implemented causal capability is intentionally small:
 
-Runtime configuration, dependency management, source-code structure, testing, CI/CD, containers, and other engineering components will be introduced through their dedicated project tasks rather than being added prematurely.
+- a randomized binary-treatment synthetic data-generating process;
+- explicit potential outcomes;
+- a known constant treatment effect;
+- deterministic simulation from explicit random seeds;
+- an unadjusted difference-in-means estimator implemented from first principles;
+- statistical recovery tests against analytically known ground truth.
 
-## Repository conventions
+This establishes a minimal randomized causal correctness foundation.
 
-### Branching
+It does **not** yet establish support for observational identification,
+propensity methods, doubly robust estimation, heterogeneous treatment effects,
+uplift optimization, sensitivity analysis, production deployment, or causal
+monitoring.
 
-`main` is the only long-lived branch.
+Phase 0 is not complete until the remaining technical and phase-gate reviews
+are finished.
 
-Development should normally occur on short-lived branches created from `main`.
+## Repository setup
 
-Recommended naming:
+Requirements:
 
-- `feat/<short-description>` — new functionality
-- `fix/<short-description>` — bug fixes
-- `chore/<short-description>` — maintenance or engineering work
-- `docs/<short-description>` — documentation changes
+- Python `>=3.12,<3.13`
+- `uv`
 
-Branches should remain small and focused and be merged back into `main` after the relevant work has been reviewed and validated.
-
-A permanent `develop` branch is intentionally not used unless future project complexity provides a concrete reason for introducing one.
-
-### Commits
-
-Commits should represent small, coherent changes.
-
-Commit messages should describe the intent of the change clearly.
-
-Typical prefixes are:
-
-- `feat:`
-- `fix:`
-- `chore:`
-- `docs:`
-- `test:`
-- `refactor:`
-
-These prefixes are a repository convention, not currently enforced by tooling.
-
-### Local pre-commit hooks
-
-Install the Git pre-commit hook once after cloning the repository:
-
-```bash
-uv run pre-commit install 
-```
-
-Run all configured hoos manually with 
-
-```bash
-uv run pre-commit run --all-files
-```
-
-The pre-commit workflow intentionally runs only fast deterministic checks. The full test and type-checking gates remain separate commands.
-
-
-## Version-control policy
-
-Files that define or explain the project should normally be versioned, including:
-
-- source code;
-- tests;
-- documentation;
-- project configuration;
-- reproducible scripts;
-- small deterministic or synthetic test fixtures;
-- dependency lockfiles when dependency management is introduced.
-
-Files that are machine-specific, sensitive, temporary, or reproducibly generated should normally not be versioned, including:
-
-- virtual environments;
-- Python and tool caches;
-- local environment-variable files;
-- secrets and credentials;
-- IDE-specific local state;
-- logs;
-- raw or private datasets;
-- generated artifacts.
-
-The `.gitignore` file contains the current repository-level exclusions.
-
-## Getting started
-
-The project uses Python 3.12 and `uv` for Python runtime and dependency management.
-
-Clone the repository and enter its root directory:
+Clone and initialize the repository:
 
 ```bash
 git clone git@github.com:Lineker98/causallift.git
 cd causallift
 uv sync --locked
 uv run pre-commit install
+```
+
+`uv` is the sole Python dependency and environment manager for the project.
+
+The package is built with `uv_build` and uses a `src` layout.
+
+## Development commands
+
+Run the complete local quality suite:
+
+```bash
+uv lock --check
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+uv run pytest
+uv run pre-commit run --all-files
+git diff --check
+```
+
+Pre-commit intentionally contains only fast deterministic checks:
+
+- Ruff lint;
+- Ruff format check.
+
+The full type-checking and test gates remain separate commands and are also
+enforced by GitHub Actions.
+
+## Current source structure
+
+The production package is:
+
+```text
+src/causallift/
+```
+
+Current causal simulation code lives under:
+
+```text
+src/causallift/simulations/
+```
+
+The repository intentionally does not yet contain production APIs, databases,
+orchestration, experiment tracking, deployment infrastructure, or other
+components that have not been justified by current requirements.
+
+## Documentation
+
+- [`docs/PROJECT.md`](docs/PROJECT.md) — project purpose, thesis, and principles.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — capability progression and current status.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — current architectural conventions.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — significant engineering decisions.
+- [`docs/CAUSAL_ASSUMPTIONS.md`](docs/CAUSAL_ASSUMPTIONS.md) — explicit causal assumptions.
+- [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) — documented causal experiments and validation.
+
+Future documentation is added only when substantive project content justifies
+it.

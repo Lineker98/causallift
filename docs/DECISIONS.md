@@ -4,7 +4,7 @@
 
 **Status:** Accepted
 
-## Decision
+### Decision
 
 Use explicit typed function parameters as the default mechanism for passing
 domain, experiment, simulation, and reproducibility-critical configuration.
@@ -20,40 +20,39 @@ runtime settings.
 
 ### Context
 
-At P0-T07, the CausalLift package contains only package metadata.
+At P0-T07, the CausalLift package contained only package metadata.
 
-There are no simulations, causal estimators, API services, persistence
+There were no simulations, causal estimators, API services, persistence
 components, or infrastructure settings requiring configuration aggregation.
 
-P0-T08 will introduce randomness behavior, and P0-T09 will introduce the first
+P0-T08 was expected to introduce randomness behavior, and P0-T09 the first
 synthetic randomized-treatment causal smoke test.
 
 ### Alternatives
 
-- Generic `config.py`.
-- Immediate `SimulationConfig`.
-- Untyped configuration dictionaries.
-- Pydantic Settings.
-- YAML or hierarchical configuration.
-- Environment-driven experiment parameters.
+- generic `config.py`;
+- immediate `SimulationConfig`;
+- untyped configuration dictionaries;
+- Pydantic Settings;
+- YAML or hierarchical configuration;
+- environment-driven experiment parameters.
 
 ### Rationale
 
-Explicit parameters are currently the smallest mechanism that keeps
-dependencies visible, typed, testable, and reproducible.
+Explicit parameters were the smallest mechanism that kept dependencies visible,
+typed, testable, and reproducible.
 
-Introducing a configuration object now would model speculative requirements
-rather than solve an existing problem.
+Introducing a configuration object at that point would have modeled
+speculative requirements rather than solved an existing problem.
 
 ### Consequences
 
-P0-T08 and subsequent stochastic components should expose reproducibility
-parameters explicitly.
+Stochastic components expose reproducibility parameters explicitly.
 
-P0-T09 should introduce only the simulation parameters required by its actual
+Simulation code introduces only the parameters required by its actual
 data-generating process.
 
-No configuration framework or dependency is added.
+No configuration framework or dependency is required.
 
 ### Risks
 
@@ -71,21 +70,49 @@ Revisit this decision when:
 - infrastructure runtime settings actually exist;
 - explicit parameter flow becomes materially harder to maintain.
 
-## Decision 
+## P0-T08: Local NumPy Generator ownership
 
-Use NumPy Generator instances created locally with default_rng(seed). Simulation entry points accept explicit seeds; lower-level stochastic helpers receive the owned Generator.
+**Status:** Accepted
+
+### Decision
+
+Use NumPy `Generator` instances created locally with `default_rng(seed)`.
+
+Top-level simulation boundaries accept explicit integer seeds. Lower-level
+stochastic helpers receive the owned `Generator` when participating in the same
+simulation run.
 
 ### Context
-P0-T09 requires deterministic synthetic causal data without introducing hidden global configuration or RNG state.
+
+Causal simulations require deterministic reproducibility without hidden global
+configuration or RNG state.
 
 ### Alternatives
-legacy np.random.seed; module-global Generator; explicit Generator(PCG64(seed)); allowing every function to accept either a seed or RNG.
+
+- legacy `np.random.seed`;
+- a module-global `Generator`;
+- explicit `Generator(PCG64(seed))`;
+- allowing every stochastic function to accept either a seed or an RNG.
 
 ### Rationale
-local ownership makes state explicit, prevents cross-test/cross-simulation interference, follows NumPy's recommended API, and avoids premature complexity.
+
+Local ownership makes random state explicit, prevents interference between
+tests and simulations, uses NumPy's current generator API, and avoids premature
+random-stream abstractions.
 
 ### Consequences
-NumPy becomes a runtime dependency. Byte-for-byte reproduction is tied to the locked software environment rather than guaranteed across arbitrary future NumPy versions.
+
+NumPy is a runtime dependency.
+
+Reproduction assumes the same explicit inputs, code, and locked dependency
+environment rather than guaranteeing identical byte streams across arbitrary
+future NumPy versions.
 
 ### Revisit when
-parallel simulation, child RNG streams, distributed execution, or a requirement for cross-version random-stream compatibility appears.
+
+Revisit this decision if the project requires:
+
+- parallel simulation;
+- deterministic child random streams;
+- distributed execution;
+- cross-version random-stream compatibility.
